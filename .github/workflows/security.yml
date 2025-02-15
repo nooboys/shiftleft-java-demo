@@ -1,0 +1,53 @@
+name: Check Code Scanning Alerts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-code-scanning-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Code Scanning Alerts
+        id: get_alerts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+
+            // Fetch code scanning alerts using GitHub API
+            const alerts = await github.rest.codeScanning.listAlertsForRepo({
+              owner: repoOwner,
+              repo: repoName,
+              tool_name: 'CodeQL',  // Change this if using a different tool
+              state: 'open'         // Only fetch open alerts
+            });
+
+            // Filter high-severity alerts
+            const highSeverityAlerts = alerts.data.filter(alert => alert.rule.severity === 'error');
+
+            // Log the number of high-severity alerts
+            console.log(`Number of high-severity alerts: ${highSeverityAlerts.length}`);
+
+            // Set output variable for next step
+            core.setOutput('high_alerts_count', highSeverityAlerts.length);
+
+      - name: Fail if High Severity Alerts Exceed Threshold
+        run: |
+          THRESHOLD=5  # Define your threshold here
+          HIGH_ALERTS_COUNT=${{ steps.get_alerts.outputs.high_alerts_count }}
+
+          if [ "$HIGH_ALERTS_COUNT" -gt "$THRESHOLD" ]; then
+            echo "Too many high-severity alerts: $HIGH_ALERTS_COUNT"
+            exit 1
+          else
+            echo "High-severity alerts are within acceptable limits."
+          fi
