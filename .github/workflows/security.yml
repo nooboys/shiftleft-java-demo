@@ -1,6 +1,7 @@
 name: Check Code Scanning Alerts
 
-on:
+on: 
+  workflow_dispatch:
   push:
     branches:
       - main
