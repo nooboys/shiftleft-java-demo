@@ -3,10 +3,10 @@ name: Check Code Scanning Alerts
 on:
   push:
     branches:
-      - main
+      - nooboys-patch-1
   pull_request:
     branches:
-      - main
+      - nooboys-patch-1
 
 jobs:
   check-code-scanning-alerts:
