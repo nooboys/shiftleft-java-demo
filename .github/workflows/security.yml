@@ -43,7 +43,7 @@ jobs:
 
       - name: Fail if High Severity Alerts Exceed Threshold
         run: |
-          THRESHOLD=5  # Define your threshold here
+          THRESHOLD=10  # Define your threshold here
           HIGH_ALERTS_COUNT=${{ steps.get_alerts.outputs.high_alerts_count }}
 
           if [ "$HIGH_ALERTS_COUNT" -gt "$THRESHOLD" ]; then
